@@ -1,0 +1,5 @@
+flask
+streamlit
+requests
+huggingface_hub
+codecarbon
