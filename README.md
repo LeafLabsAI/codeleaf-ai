@@ -37,3 +37,57 @@ This is the **MVP (Phase 1)** version — lightweight, runs locally, and integra
 ```bash
 git clone https://github.com/<your-username>/codeleaf-ai.git
 cd codeleaf-ai
+
+2. Create Virtual Environment
+python -m venv venv
+source venv/bin/activate   # (Linux/Mac)
+venv\Scripts\activate      # (Windows PowerShell)
+
+3. Install Dependencies
+pip install -r requirements.txt
+
+4. Get Hugging Face Token
+
+Create free account → Hugging Face
+
+Go to → Access Tokens
+
+Create a token with Read permissions.
+
+Copy it (looks like hf_xxxxxxxxxxx).
+
+5. Add Environment Variables
+
+Create a .env file in the root:
+
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxx
+
+
+⚠️ Don’t push .env to GitHub (already in .gitignore).
+
+6. Run Streamlit App
+streamlit run app.py
+
+📂 Project Structure
+codeleaf-ai/
+│── app.py              # Streamlit frontend
+│── backend.py          # Hugging Face + AI logic
+│── requirements.txt    # Dependencies
+│── .env                # HF Token (not pushed to git)
+│── .gitignore
+│── README.md
+
+🚀 Roadmap
+
+ Phase 1 – MVP (Docs + Spreadsheets + Hugging Face API)
+
+ Phase 2 – Add vector DB (FAISS / ChromaDB) for local document search
+
+ Phase 3 – Deploy free on Streamlit Cloud / Hugging Face Spaces
+
+ Phase 4 – Add advanced agents (LangChain, local models)
+
+🤝 Contributing
+
+Since this is a student project, any feedback, ideas, or contributions are welcome.
+Feel free to fork and open PRs.
