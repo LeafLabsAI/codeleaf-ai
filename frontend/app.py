@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 st.set_page_config(page_title="CodeLeaf AI", page_icon="🌱", layout="centered")
-st.image("assets/logo/your_logo.png", width=180)
+st.image("assets/logo/CodeLeaf.png", width=180)
 st.title("CodeLeaf AI — A Green Leap Forward")
 
 prompt = st.text_area("Describe the code you want:", height=150)
