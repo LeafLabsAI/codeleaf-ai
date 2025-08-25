@@ -25,7 +25,7 @@ def codegen():
         # ✅ Call Hugging Face Inference API
         headers = {"Authorization": f"Bearer {HF_TOKEN}"}
         payload = {"inputs": prompt, "parameters": {"max_new_tokens": 200}}
-        MODEL = "microsoft/phi2"
+        MODEL = "microsoft/phi-2"
         response = requests.post(
             f"https://api-inference.huggingface.co/models/{MODEL}",
             headers=headers,
