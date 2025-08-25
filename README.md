@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo/"CodeLeaf.png" alt="CodeLeaf AI Logo" width="200"/>
+  <img src="assets/logo/CodeLeaf.png" alt="CodeLeaf AI Logo" width="200"/>
 </p>
 
 <h1 align="center">🌿 CodeLeaf AI</h1>
