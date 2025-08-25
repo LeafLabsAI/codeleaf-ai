@@ -2,8 +2,7 @@
   <img src="assets/logo/CodeLeaf.png" alt="CodeLeaf AI Logo" width="200"/>
 </p>
 
-<h1 align="center">🌿 CodeLeaf AI</h1>
-<p align="center"><i>"A Green Leap Forward in AI — Smart, Simple, Student-Friendly"</i></p>
+<p align="center"><i>"A Green Leap Forward — Smart, Simple, Student-Friendly"</i></p>
 
 ---
 
