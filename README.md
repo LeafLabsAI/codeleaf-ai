@@ -38,7 +38,8 @@ This is the **MVP (Phase 1)** version — lightweight, runs locally, and integra
 git clone https://github.com/<your-username>/codeleaf-ai.git
 cd codeleaf-ai
 
-2. Create Virtual Environment
+### Step 2 Clone the Repository
+```bash
 python -m venv venv
 source venv/bin/activate   # (Linux/Mac)
 venv\Scripts\activate      # (Windows PowerShell)
