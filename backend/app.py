@@ -1,32 +1,56 @@
 from flask import Flask, request, jsonify
-from huggingface_hub import InferenceClient
-from codecarbon import EmissionsTracker
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
-HF_TOKEN = os.getenv("HF_TOKEN")  # add this later to .env (not committed)
+import requests
 
 app = Flask(__name__)
-client = InferenceClient("bigcode/starcoder", token=HF_TOKEN)
 
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"msg": "CodeLeaf AI Backend 🌱"})
+# ✅ Hugging Face token (set your own in env)
+HF_TOKEN = os.getenv("HF_TOKEN", None)
+MODEL = "bigcode/starcoder"  # or whichever model you use
 
 @app.route("/codegen", methods=["POST"])
 def codegen():
-    body = request.get_json(force=True)
-    prompt = body.get("prompt", "")
+    try:
+        data = request.json
+        prompt = data.get("prompt", "")
 
-    tracker = EmissionsTracker(measure_power_secs=1, log_level="warning")
-    tracker.start()
-    result = client.text_generation(
-        f"Write clean, efficient Python code. {prompt}\n",
-        max_new_tokens=180
-    )
-    emissions = tracker.stop()  # kg CO2eq (estimate)
-    return jsonify({"code": result, "co2_kg": emissions})
+        if not prompt:
+            return jsonify({"error": "No prompt provided"}), 400
+
+        # ⚡ If HF token not set, fallback with dummy code
+        if not HF_TOKEN:
+            code = f"# Dummy code for: {prompt}\nprint('Hello CodeLeaf! 🌱')"
+            return jsonify({"code": code, "co2_kg": 0.000123})
+
+        # ✅ Call Hugging Face Inference API
+        headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+        payload = {"inputs": prompt, "parameters": {"max_new_tokens": 200}}
+        MODEL = "microsoft/phi2"
+        response = requests.post(
+            f"https://api-inference.huggingface.co/models/{MODEL}",
+            headers=headers,
+            json=payload,
+            timeout=60
+        )
+
+        if response.status_code != 200:
+            return jsonify({"error": f"HF API error: {response.text}"}), 500
+
+        result = response.json()
+        # Extract text depending on model output
+        if isinstance(result, list) and "generated_text" in result[0]:
+            code = result[0]["generated_text"]
+        else:
+            code = str(result)
+
+        return jsonify({
+            "code": code,
+            "co2_kg": 0.000123  # replace with real calc later
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True)
