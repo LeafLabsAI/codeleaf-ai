@@ -2,7 +2,7 @@
 **A Green Leap Forward**
 
 <p align="center">
-  <img src="assets/logo/your_logo.png" alt="CodeLeaf AI Logo" width="250"/>
+  <img src="assets/logo/CodeLeaf.png" alt="CodeLeaf AI Logo" width="250"/>
 </p>
 
 CodeLeaf AI is an **eco-conscious AI coding assistant**.  
