@@ -3,3 +3,4 @@ streamlit
 requests
 huggingface_hub
 codecarbon
+python-dotenv
