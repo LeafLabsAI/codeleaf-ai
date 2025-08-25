@@ -33,22 +33,23 @@ This is the **MVP (Phase 1)** version — lightweight, runs locally, and integra
 
 ## 🚀 Quick Start (Step by Step)
 
-### Step 1️⃣ Clone the Repository
+### Step 1 Clone the Repository
 ```bash
 git clone https://github.com/<your-username>/codeleaf-ai.git
 cd codeleaf-ai
-
-### Step 2 Clone the Repository
-```bash
+```
+### 2 Create Virtual Environment
 python -m venv venv
 source venv/bin/activate   # (Linux/Mac)
 venv\Scripts\activate      # (Windows PowerShell)
 
-3. Install Dependencies
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
+```
 
-4. Get Hugging Face Token
-
+### 4. Get Hugging Face Token
+```bash
 Create free account → Hugging Face
 
 Go to → Access Tokens
@@ -56,28 +57,21 @@ Go to → Access Tokens
 Create a token with Read permissions.
 
 Copy it (looks like hf_xxxxxxxxxxx).
-
-5. Add Environment Variables
-
+```
+### 5. Add Environment Variables
+```bash
 Create a .env file in the root:
 
 HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxx
 
 
 ⚠️ Don’t push .env to GitHub (already in .gitignore).
-
-6. Run Streamlit App
+```
+### 6. Run Streamlit App
+```bash
 streamlit run app.py
 
-📂 Project Structure
-codeleaf-ai/
-│── app.py              # Streamlit frontend
-│── backend.py          # Hugging Face + AI logic
-│── requirements.txt    # Dependencies
-│── .env                # HF Token (not pushed to git)
-│── .gitignore
-│── README.md
-
+```
 🚀 Roadmap
 
  Phase 1 – MVP (Docs + Spreadsheets + Hugging Face API)
@@ -92,3 +86,4 @@ codeleaf-ai/
 
 Since this is a student project, any feedback, ideas, or contributions are welcome.
 Feel free to fork and open PRs.
+
