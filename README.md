@@ -39,10 +39,11 @@ git clone https://github.com/<your-username>/codeleaf-ai.git
 cd codeleaf-ai
 ```
 ### 2 Create Virtual Environment
+```bash
 python -m venv venv
 source venv/bin/activate   # (Linux/Mac)
 venv\Scripts\activate      # (Windows PowerShell)
-
+```
 ### 3. Install Dependencies
 ```bash
 pip install -r requirements.txt
