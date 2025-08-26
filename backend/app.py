@@ -9,6 +9,7 @@ import sys
 import subprocess
 import time
 import statistics
+import json
 
 # ======================
 # Flask App Configuration
@@ -39,14 +40,17 @@ def clean_code(code: str) -> str:
     cleaned_lines = [line for line in cleaned_lines if line]
     return "\n".join(cleaned_lines)
 
-def run_code_and_track_emissions(code: str) -> float:
+def run_code_and_track_emissions(code: str, test_params: dict) -> float:
     """
-    Measures the CO2 emissions of executing a given code string by running it
-    multiple times and returning the average. This approach mitigates the
-    effect of system noise and provides a more stable reading.
+    Measures the CO2 emissions of executing a given code string.
+    This function creates a temporary Python script, writes the provided code
+    and a testing block into it, and then executes it as a separate process.
     
     Args:
         code (str): The Python code to execute and measure.
+        test_params (dict): A dictionary containing test case parameters.
+            - 'function_name': The name of the function to be tested.
+            - 'data_size': An integer for the size of the test data.
         
     Returns:
         float: The average CO2 emissions in kg over multiple runs.
@@ -58,35 +62,42 @@ def run_code_and_track_emissions(code: str) -> float:
     temp_file = None
     emissions_list = []
     
-    # We will run the code multiple times and average the results
-    # Reduced from 5 to 3 runs for faster performance.
+    # We will run the code multiple times and average the results to mitigate noise
     num_runs = 3
+    
+    function_name = test_params.get('function_name', 'your_function')
+    data_size = test_params.get('data_size', 100000)
+
+    # We need a predictable, large test case to highlight performance differences
+    test_case_setup = f"""
+import random
+large_list = list(range({data_size}))
+target = large_list[int({data_size} / 2)]
+"""
     
     try:
         # Create a temporary file to store the code
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
             temp_file = f.name
             
-            # Wrap the user's code in a large loop to increase execution time
+            # The test script includes the provided code and a test runner
             wrapped_code = f"""
 import sys
 import time
 import traceback
+import random
 
-def main():
+{code}
+
+# Test runner
+if __name__ == "__main__":
     try:
-        # Your provided code goes here
-        {code}
-        # End of provided code
+        {test_case_setup}
+        # Call the user's function with the large test data
+        {function_name}(target, large_list)
     except Exception as e:
         print(f"Error during code execution: {{e}}", file=sys.stderr)
         traceback.print_exc()
-    
-if __name__ == "__main__":
-    # Run the user's code 10,000,000 times within each measurement
-    # This ensures a high signal-to-noise ratio
-    for _ in range(10000000):
-        main()
 """
             f.write(wrapped_code)
             f.flush()
@@ -168,7 +179,8 @@ def codegen():
         code = clean_code(result.choices[0].message.content)
         
         # Now, run and measure the CO2 of the generated code
-        execution_co2_kg = run_code_and_track_emissions(code)
+        # We use a dummy test case here as we don't know the function or its purpose.
+        execution_co2_kg = run_code_and_track_emissions(code, {"function_name": "dummy_function", "data_size": 1})
         
         if not code:
             code = "# No code generated."
@@ -202,17 +214,25 @@ def optimize():
         if client is None:
             return jsonify({"error": "Hugging Face API token not set. Please set the HF_TOKEN environment variable."}), 500
 
+        # Define a consistent test case for both versions
+        test_case_params = {
+            "function_name": "find_first_occurrence",
+            "data_size": 1000000
+        }
+
         # Measure CO2 for the original unoptimized code
-        co2_before_kg = run_code_and_track_emissions(unoptimized_code)
+        co2_before_kg = run_code_and_track_emissions(unoptimized_code, test_case_params)
         
         # Craft a prompt for the optimizer LLM
         optimization_prompt = f"""
-        The following Python code is inefficient. Your task is to provide an optimized version that reduces its energy consumption. Explain the changes briefly, and then provide only the final optimized code.
-
+        The following Python code is inefficient. Your task is to provide an optimized version that reduces its energy consumption.
+        
         Unoptimized code:
+        ```python
         {unoptimized_code}
-
-        Optimized code:
+        ```
+        
+        Provide only the final optimized Python code, no additional text or explanations.
         """
 
         # Use the tracker to measure emissions of the AI call for optimization
@@ -220,7 +240,7 @@ def optimize():
         tracker_optimize.start()
 
         messages = [
-            {"role": "system", "content": "You are a highly skilled Python code optimizer. Your goal is to improve code efficiency and reduce its environmental impact. Respond with the optimized code and a brief explanation of the changes."},
+            {"role": "system", "content": "You are a highly skilled Python code optimizer. Your goal is to improve code efficiency and reduce its environmental impact. Respond with the optimized code."},
             {"role": "user", "content": optimization_prompt}
         ]
 
@@ -238,7 +258,7 @@ def optimize():
         optimized_code = clean_code(optimized_response.split("```python")[-1].split("```")[0])
 
         # Measure CO2 for the newly optimized code
-        co2_after_kg = run_code_and_track_emissions(optimized_code)
+        co2_after_kg = run_code_and_track_emissions(optimized_code, test_case_params)
 
         return jsonify({
             "optimized_code": optimized_code,
