@@ -3,4 +3,4 @@ __pycache__/
 .env
 .vscode/
 .venv/
-emissions.csv/
+emissions/
