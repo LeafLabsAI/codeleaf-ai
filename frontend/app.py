@@ -98,7 +98,8 @@ if "history" not in st.session_state:
 # ======================
 # 🌿 Logo + Titles
 # ======================
-st.image("https://placehold.co/180x180/0f1116/4ade80?text=CodeLeaf%20AI", width=180)
+# Updated the logo path to the absolute path provided by the user
+st.image("C:/Users/sumit/Downloads/CodeLeaf-AI/assets/logo/CodeLeaf.png", width=180)
 st.markdown('<div class="title">🌿 CodeLeaf AI</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">A Green Leap Forward – Generate Smarter Code</div>', unsafe_allow_html=True)
 
