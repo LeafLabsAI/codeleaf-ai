@@ -1,0 +1,44 @@
+2025-09-06 23:23:21,493 [INFO] \U0001f680 Starting Flask backend on http://127.0.0.1:5000
+2025-09-06 23:23:21,568 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-06 23:23:21,569 [INFO] [33mPress CTRL+C to quit[0m
+2025-09-06 23:23:21,593 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:23:22,985 [INFO] \U0001f680 Starting Flask backend on http://127.0.0.1:5000
+2025-09-06 23:23:23,001 [WARNING]  * Debugger is active!
+2025-09-06 23:23:23,006 [INFO]  * Debugger PIN: 144-155-676
+2025-09-06 23:25:00,130 [INFO]  * Detected change in 'C:\\Python Environment\\Lib\\site-packages\\streamlit\\env_util.py', reloading
+2025-09-06 23:25:00,163 [INFO]  * Detected change in 'C:\\Python Environment\\Lib\\site-packages\\streamlit\\runtime\\scriptrunner\\script_runner.py', reloading
+2025-09-06 23:25:00,173 [INFO]  * Detected change in 'C:\\Python Environment\\Lib\\site-packages\\streamlit\\runtime\\scriptrunner\\exec_code.py', reloading
+2025-09-06 23:25:00,186 [INFO]  * Detected change in 'C:\\Python Environment\\Lib\\threading.py', reloading
+2025-09-06 23:25:00,440 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:25:02,099 [INFO] \U0001f680 Starting Flask backend on http://127.0.0.1:5000
+2025-09-06 23:25:02,111 [WARNING]  * Debugger is active!
+2025-09-06 23:25:02,113 [INFO]  * Debugger PIN: 144-155-676
+2025-09-06 23:25:20,824 [INFO] [CodeGen] Prompt received: python based arithmetic calculator
+
+2025-09-06 23:25:20,905 [INFO]  * Detected change in 'C:\\Python Environment\\Lib\\site-packages\\cpuinfo\\cpuinfo.py', reloading
+2025-09-06 23:25:21,326 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:25:22,993 [INFO] \U0001f680 Starting Flask backend on http://127.0.0.1:5000
+2025-09-06 23:25:23,006 [WARNING]  * Debugger is active!
+2025-09-06 23:25:23,008 [INFO]  * Debugger PIN: 144-155-676
+2025-09-06 23:27:38,071 [INFO]  * Detected change in 'C:\\Users\\sumit\\Downloads\\CodeLeaf-AI\\backend\\app.py', reloading
+2025-09-06 23:27:38,073 [INFO]  * Detected change in 'C:\\Users\\sumit\\Downloads\\CodeLeaf-AI\\backend\\app.py', reloading
+2025-09-06 23:27:38,493 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:29:53,498 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:30:09,255 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:30:38,079 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:36:30,644 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:36:59,304 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:45:03,467 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:46:49,452 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:48:19,613 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:55:42,387 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-06 23:56:56,121 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 00:08:33,627 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 00:09:08,303 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 00:55:52,664 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 00:56:05,599 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 01:04:15,669 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 01:05:33,644 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 01:11:58,384 [INFO]  * Restarting with watchdog (windowsapi)
+2025-09-07 01:13:32,276 [INFO]  * Restarting with watchdog (windowsapi)

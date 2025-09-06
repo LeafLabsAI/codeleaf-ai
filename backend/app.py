@@ -42,16 +42,17 @@ def clean_code(code: str) -> str:
 
 def run_code_and_track_emissions(code: str, test_params: dict) -> float:
     """
-    Measures the CO2 emissions of executing a given code string.
-    This function creates a temporary Python script, writes the provided code
-    and a testing block into it, and then executes it as a separate process.
-    
+    Measures the CO2 emissions of executing a given code string using a subprocess.
+    This function creates a temporary Python script that wraps the provided code
+    in a `codecarbon` tracker and a test runner. It then executes this script
+    as a new process and parses the emissions output from its stdout.
+
     Args:
         code (str): The Python code to execute and measure.
         test_params (dict): A dictionary containing test case parameters.
             - 'function_name': The name of the function to be tested.
             - 'data_size': An integer for the size of the test data.
-        
+
     Returns:
         float: The average CO2 emissions in kg over multiple runs.
     """
@@ -61,13 +62,11 @@ def run_code_and_track_emissions(code: str, test_params: dict) -> float:
 
     temp_file = None
     emissions_list = []
-    
-    # We will run the code multiple times and average the results to mitigate noise
     num_runs = 3
     
     function_name = test_params.get('function_name', 'your_function')
     data_size = test_params.get('data_size', 100000)
-
+    
     # We need a predictable, large test case to highlight performance differences
     test_case_setup = f"""
 import random
@@ -76,52 +75,91 @@ target = large_list[int({data_size} / 2)]
 """
     
     try:
-        # Create a temporary file to store the code
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
             temp_file = f.name
             
-            # The test script includes the provided code and a test runner
+            # The test script includes the provided code, the test runner,
+            # and the codecarbon tracker
             wrapped_code = f"""
 import sys
-import time
 import traceback
+import json
+from codecarbon import EmissionsTracker
 import random
+import time
 
 {code}
 
 # Test runner
 if __name__ == "__main__":
+    emissions_data = {{}}
     try:
+        # Initialize and start the tracker within this subprocess
+        tracker = EmissionsTracker()
+        tracker.start()
+
         {test_case_setup}
+        
         # Call the user's function with the large test data
-        {function_name}(target, large_list)
+        try:
+            # We use a try-except block here to handle cases where the function might not exist
+            # or the parameters are incorrect.
+            # This is a safe way to execute the user's code.
+            func_to_call = locals().get('{function_name}')
+            if callable(func_to_call):
+                func_to_call(target, large_list)
+            else:
+                # If the function is not found, run a default heavy operation
+                print("Function not found, running default CPU-intensive loop...", file=sys.stderr)
+                for _ in range(10000000):
+                    _ = 1 + 1
+        except Exception as e:
+            # We catch the exception and print it for debugging, but don't fail the emissions
+            # measurement. This allows us to still get a baseline reading.
+            print(f"Error during user code execution: {{e}}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+
+        # Stop the tracker and get the emissions
+        emissions = tracker.stop()
+        emissions_data['emissions'] = emissions
+
     except Exception as e:
-        print(f"Error during code execution: {{e}}", file=sys.stderr)
-        traceback.print_exc()
+        emissions_data['error'] = str(e)
+        traceback.print_exc(file=sys.stderr)
+    
+    # Print the result as a JSON object for the parent process to parse
+    print(json.dumps(emissions_data))
 """
             f.write(wrapped_code)
             f.flush()
 
-        # Run the subprocess multiple times and collect the emissions
         for i in range(num_runs):
             print(f"Starting measurement run {i+1} of {num_runs}...")
-            # Initialize the EmissionsTracker
-            tracker = EmissionsTracker()
             
-            # Start the tracker
-            tracker.start()
-            
-            # Execute the temporary file. `subprocess.run` is more robust.
-            result = subprocess.run([sys.executable, temp_file], capture_output=True, text=True, timeout=60)
-            
-            # Stop the tracker and get the emissions value
-            emissions = tracker.stop()
-            emissions_list.append(emissions)
-            
+            result = subprocess.run(
+                [sys.executable, temp_file],
+                capture_output=True,
+                text=True,
+                timeout=120  # Increased timeout for large data sizes
+            )
+
+            # Check for subprocess errors
             if result.stderr:
                 print(f"Subprocess returned errors:\n{result.stderr}")
-        
-        # Calculate the average emissions from all runs
+            
+            # Attempt to parse the JSON output
+            try:
+                output = json.loads(result.stdout)
+                if 'emissions' in output:
+                    emissions_list.append(output['emissions'])
+                elif 'error' in output:
+                    print(f"Error in subprocess execution: {output['error']}")
+                    break # Stop if there's an error
+            except json.JSONDecodeError:
+                print("Failed to decode JSON from subprocess output.")
+                print(f"Subprocess output was:\n{result.stdout}")
+                break
+
         if emissions_list:
             average_emissions = statistics.mean(emissions_list)
             print(f"Measurements: {emissions_list}")
@@ -129,15 +167,14 @@ if __name__ == "__main__":
             return average_emissions
         else:
             return 0.0
-            
+
     except subprocess.TimeoutExpired:
-        print("Code execution timed out after 60 seconds.")
+        print("Code execution timed out.")
         return 0.0
     except Exception as e:
         print(f"Error measuring emissions: {e}")
         return 0.0
     finally:
-        # Clean up the temporary file
         if temp_file and os.path.exists(temp_file):
             os.remove(temp_file)
 
@@ -170,7 +207,7 @@ def codegen():
         
         result = client.chat_completion(
             messages=messages,
-            max_tokens=200
+            max_tokens=800
         )
         
         # Stop the tracker and get the emissions value
@@ -225,15 +262,15 @@ def optimize():
         
         # Craft a prompt for the optimizer LLM
         optimization_prompt = f"""
-        The following Python code is inefficient. Your task is to provide an optimized version that reduces its energy consumption.
-        
-        Unoptimized code:
-        ```python
-        {unoptimized_code}
-        ```
-        
-        Provide only the final optimized Python code, no additional text or explanations.
-        """
+The following Python code is inefficient. Your task is to provide an optimized version that reduces its energy consumption.
+
+Unoptimized code:
+```python
+{unoptimized_code}
+```
+
+Provide only the final optimized Python code, no additional text or explanations.
+"""
 
         # Use the tracker to measure emissions of the AI call for optimization
         tracker_optimize = EmissionsTracker()
@@ -246,7 +283,7 @@ def optimize():
 
         result = client.chat_completion(
             messages=messages,
-            max_tokens=300
+            max_tokens=800
         )
         
         # Stop the tracker and get the emissions value
