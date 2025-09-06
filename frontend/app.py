@@ -4,6 +4,7 @@ import json
 import pandas as pd
 from datetime import datetime
 from streamlit_option_menu import option_menu
+import plotly.express as px
 
 # ======================
 # 🎨 Page Configuration
@@ -11,41 +12,76 @@ from streamlit_option_menu import option_menu
 st.set_page_config(
     page_title="CodeLeaf AI",
     page_icon="🌿",
-    layout="centered"
+    layout="wide"
 )
+
+# ======================
+# Theme Colors
+# ======================
+dark_theme = {
+    "background_main": "#0f1116",
+    "background_secondary": "#181a1f",
+    "text_color": "#e0e0e0",
+    "primary_color": "#4ade80",
+    "secondary_color": "#9ca3af",
+    "border_color": "#4ade80",
+    "card_bg": "#1e2128",
+    "card_border": "#6b7280"
+}
+
+light_theme = {
+    "background_main": "#f0f2f6",
+    "background_secondary": "#ffffff",
+    "text_color": "#333333",
+    "primary_color": "#16a34a",
+    "secondary_color": "#4b5563",
+    "border_color": "#16a34a",
+    "card_bg": "#f9fafb",
+    "card_border": "#d1d5db"
+}
+
+# Use session state to manage the theme across reruns
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+
+theme = dark_theme if st.session_state.theme == "dark" else light_theme
 
 # ======================
 # 🎨 Custom CSS Styling
 # ======================
-st.markdown("""
+st.markdown(f"""
     <style>
-        .main {
-            background-color: #0f1116;
-            color: #e0e0e0;
-        }
-        .title {
-            font-size: 2.5rem;
+        body {{
+            background-color: {theme['background_main']};
+            color: {theme['text_color']};
+        }}
+        .main {{
+            background-color: {theme['background_main']};
+            color: {theme['text_color']};
+        }}
+        .title {{
+            font-size: 2.8rem;
             font-weight: bold;
-            color: #4ade80;
+            color: {theme['primary_color']};
             text-align: center;
-            margin-bottom: 10px;
-        }
-        .subtitle {
+            margin-bottom: 5px;
+        }}
+        .subtitle {{
             font-size: 1.2rem;
-            color: #9ca3af;
+            color: {theme['secondary_color']};
             text-align: center;
-            margin-bottom: 30px;
-        }
-        .stTextArea textarea {
+            margin-bottom: 25px;
+        }}
+        .stTextArea textarea {{
             border-radius: 12px;
-            border: 1px solid #4ade80;
+            border: 1px solid {theme['border_color']};
             padding: 12px;
             font-size: 1rem;
-            background-color: #181a1f;
-            color: #e0e0e0;
-        }
-        .stButton>button {
-            background: linear-gradient(to right, #4ade80, #22c55e);
+            background-color: {theme['background_secondary']};
+            color: {theme['text_color']};
+        }}
+        .stButton>button {{
+            background: linear-gradient(to right, {theme['primary_color']}, #22c55e);
             color: white;
             border-radius: 10px;
             padding: 10px 20px;
@@ -53,39 +89,46 @@ st.markdown("""
             font-weight: bold;
             transition: 0.3s;
             border: none;
-        }
-        .stButton>button:hover {
+        }}
+        .stButton>button:hover {{
             background: linear-gradient(to right, #22c55e, #16a34a);
             transform: scale(1.05);
-        }
-        .output-card {
-            background-color: #1e2128;
+        }}
+        .output-card {{
+            background-color: {theme['card_bg']};
             padding: 20px;
             border-radius: 12px;
             margin-top: 20px;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        .optimization-card {
-            background-color: #1e2121;
+        }}
+        .optimization-card {{
+            background-color: {theme['card_bg']};
             padding: 20px;
             border-radius: 12px;
             margin-top: 20px;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
-            border: 1px solid #6b7280;
-        }
-        footer {
+            border: 1px solid {theme['card_border']};
+        }}
+        .history-card {{
+            background-color: {theme['background_secondary']};
+            border: 1px solid {theme['card_border']};
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }}
+        footer {{
             text-align: center;
             margin-top: 50px;
             font-size: 0.9rem;
-            color: #6b7280;
-        }
-        footer a {
-            color: #4ade80;
+            color: {theme['secondary_color']};
+        }}
+        footer a {{
+            color: {theme['primary_color']};
             text-decoration: none;
-        }
-        footer a:hover {
+        }}
+        footer a:hover {{
             text-decoration: underline;
-        }
+        }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -96,12 +139,21 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 # ======================
-# 🌿 Logo + Titles
+# 🌿 Logo + Titles + Theme Switch
 # ======================
-# Updated the logo path to the absolute path provided by the user
-st.image("C:/Users/sumit/Downloads/CodeLeaf-AI/assets/logo/CodeLeaf.png", width=180)
-st.markdown('<div class="title">🌿 CodeLeaf AI</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">A Green Leap Forward – Generate Smarter Code</div>', unsafe_allow_html=True)
+col_logo, col_theme = st.columns([1, 0.1])
+with col_logo:
+    # Conditionally load the logo based on the current theme
+    logo_path = "assets/logo/CodeLeaf.png" if st.session_state.theme == "dark" else "assets/logo/CodeLeaf-light.png"
+    st.image(logo_path, width=180)
+    st.markdown('<div class="title">🌿 CodeLeaf AI</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">A Green Leap Forward – Generate Smarter, Greener Code</div>', unsafe_allow_html=True)
+with col_theme:
+    # This is the theme toggle. Its state is saved in `st.session_state`.
+    if st.toggle("Dark Mode", value=(st.session_state.theme == "dark")):
+        st.session_state.theme = "dark"
+    else:
+        st.session_state.theme = "light"
 
 # ======================
 # ⚡ Menu for Navigation
@@ -114,10 +166,10 @@ selected_option = option_menu(
     default_index=0,
     orientation="horizontal",
     styles={
-        "container": {"padding": "0!important", "background-color": "#111827", "border-radius": "10px"},
-        "icon": {"color": "#4ade80", "font-size": "18px"},
-        "nav-link": {"font-size": "14px", "color": "#e0e0e0", "text-align": "center", "margin":"0px", "--hover-color": "#1f2937"},
-        "nav-link-selected": {"background-color": "#22c55e"},
+        "container": {"padding": "0!important", "background-color": theme['background_secondary'], "border-radius": "10px"},
+        "icon": {"color": theme['primary_color'], "font-size": "18px"},
+        "nav-link": {"font-size": "14px", "color": theme['text_color'], "text-align": "center", "margin":"0px", "--hover-color": theme['card_bg']},
+        "nav-link-selected": {"background-color": theme['primary_color']},
     }
 )
 
@@ -125,28 +177,23 @@ selected_option = option_menu(
 # 🚀 View: Code Generation
 # ======================
 if selected_option == "Code Generation":
-    # Input area for code generation prompt
     prompt = st.text_area("💡 Describe the code you want:", height=150, placeholder="e.g., Python calculator, sorting algorithm...")
 
-    # Button to trigger code generation
     if st.button("⚡ Generate Code", key="generate_code"):
         if prompt.strip():
             with st.spinner("🌱 Growing your code..."):
                 try:
-                    # Call the Flask backend's codegen endpoint
+                    # This requests call communicates with the Flask backend.
                     r = requests.post("http://127.0.0.1:5000/codegen", json={"prompt": prompt})
                     r.raise_for_status()
                     data = r.json()
 
-                    # Display the generated code and CO2 data
                     st.markdown('<div class="output-card">', unsafe_allow_html=True)
                     st.subheader("📝 Generated Code")
                     st.code(data["code"], language="python")
-                    # Correctly use the 'total_co2_kg' key from the backend
                     st.success(f"🌍 Estimated Total CO₂: {data['total_co2_kg']:.6f} kg")
                     st.markdown('</div>', unsafe_allow_html=True)
 
-                    # Save the event to session history, including the new CO2 metrics
                     st.session_state.history.insert(0, {
                         "type": "generation",
                         "prompt": prompt,
@@ -166,16 +213,13 @@ if selected_option == "Code Generation":
 # 📈 View: Code Optimization
 # ======================
 elif selected_option == "Code Optimization":
-    # Input area for unoptimized code
     st.subheader("Unoptimized Code")
-    unoptimized_code = st.text_area("Paste your code here:", height=300, key="unoptimized_code_input", placeholder="e.g., inefficient sorting, a large loop...")
-    
-    # Button to trigger optimization
+    unoptimized_code = st.text_area("Paste your code here:", height=300, key="unoptimized_code_input")
+
     if st.button("♻️ Optimize & Compare", key="optimize_code"):
         if unoptimized_code.strip():
             with st.spinner("🌿 Optimizing your code..."):
                 try:
-                    # Send the code to the backend for dynamic CO2 measurement and optimization
                     payload = {"code": unoptimized_code}
                     r = requests.post("http://127.0.0.1:5000/optimize", json=payload)
                     r.raise_for_status()
@@ -190,11 +234,10 @@ elif selected_option == "Code Optimization":
                         st.info(f"Before CO₂: {data['before_co2']:.6f} kg")
                     with col2:
                         st.success(f"After CO₂: {data['after_co2']:.6f} kg")
-                    
+
                     st.markdown(f"**CO₂ Saved:** :green[**{(data['before_co2'] - data['after_co2']):.6f} kg**]")
                     st.markdown('</div>', unsafe_allow_html=True)
 
-                    # Save the event to session history
                     st.session_state.history.insert(0, {
                         "type": "optimization",
                         "unoptimized_code": unoptimized_code,
@@ -215,39 +258,41 @@ elif selected_option == "Code Optimization":
 # ======================
 elif selected_option == "Dashboard":
     st.header("📊 Your Green Dashboard")
-    
+
     if st.session_state.history:
-        # Create a DataFrame for the chart
+        # Create DataFrame for chart
         generation_data = [item for item in st.session_state.history if item["type"] == "generation"]
         if generation_data:
             chart_data = [{
                 "Timestamp": item["timestamp"].strftime("%H:%M:%S"),
-                "Total CO2 Emissions (kg)": item["llm_co2_kg"] + item["execution_co2_kg"]
+                "Total CO₂ (kg)": item["llm_co2_kg"] + item["execution_co2_kg"]
             } for item in generation_data]
+
             df = pd.DataFrame(chart_data)
-            st.subheader("Last 10 Code Generations by Total CO₂ Footprint")
-            st.bar_chart(df.set_index("Timestamp"))
-        
+
+            st.subheader("Last Code Generations by CO₂ Footprint")
+            fig = px.bar(df, x="Timestamp", y="Total CO₂ (kg)", text="Total CO₂ (kg)", color="Total CO₂ (kg)",
+                          color_continuous_scale="greens")
+            st.plotly_chart(fig, use_container_width=True)
+
         st.subheader("📜 History Log")
         for item in st.session_state.history:
-            if item["type"] == "generation":
-                st.markdown(f"**Generated Code** at `{item['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}`")
-                st.markdown(f"**Prompt:** {item['prompt']}")
-                st.code(item["code"][:100] + "..." if len(item["code"]) > 100 else item["code"], language="python")
-                
-                # Display the breakdown of CO2 for generated code
-                st.markdown(f"**LLM CO₂:** `{item['llm_co2_kg']:.6f} kg`")
-                st.markdown(f"**Code Execution CO₂:** `{item['execution_co2_kg']:.6f} kg`")
-                st.markdown(f"**Total CO₂:** `{item['llm_co2_kg'] + item['execution_co2_kg']:.6f} kg`")
-                st.markdown("---")
-            elif item["type"] == "optimization":
-                st.markdown(f"**Code Optimization** at `{item['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}`")
-                st.markdown(f"**Before CO₂:** `{item['co2_before_kg']:.6f} kg`")
-                st.markdown(f"**After CO₂:** `{item['co2_after_kg']:.6f} kg`")
-                st.markdown(f"**CO₂ Saved:** `:green[{(item['co2_before_kg'] - item['co2_after_kg']):.6f} kg]`")
-                st.markdown("---")
+            with st.expander(f"🔹 {item['type'].capitalize()} @ {item['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
+                if item["type"] == "generation":
+                    st.markdown(f"**Prompt:** {item['prompt']}")
+                    st.code(item["code"], language="python")
+                    st.markdown(f"**LLM CO₂:** `{item['llm_co2_kg']:.6f} kg`")
+                    st.markdown(f"**Execution CO₂:** `{item['execution_co2_kg']:.6f} kg`")
+                elif item["type"] == "optimization":
+                    st.markdown("**Before Optimization Code:**")
+                    st.code(item["unoptimized_code"], language="python")
+                    st.markdown("**After Optimization Code:**")
+                    st.code(item["optimized_code"], language="python")
+                    st.markdown(f"**Before CO₂:** `{item['co2_before_kg']:.6f} kg`")
+                    st.markdown(f"**After CO₂:** `{item['co2_after_kg']:.6f} kg`")
+                    st.markdown(f"**Saved:** `{(item['co2_before_kg'] - item['co2_after_kg']):.6f} kg`")
     else:
-        st.info("No history to display yet. Start generating or optimizing some code!")
+        st.info("No history yet. Start generating or optimizing some code!")
 
 # ======================
 # ❤️ Footer
@@ -256,3 +301,30 @@ st.markdown(
     "<footer>Made with ❤️ by LeafLabsAI • <a href='https://github.com/LeafLabsAI/codeleaf-ai'>GitHub</a></footer>",
     unsafe_allow_html=True
 )
+
+# ======================
+# 💡 Further Ideas to Implement
+# ======================
+st.markdown("""
+### 🌳 Ideas to Grow Your App:
+
+1.  **More Detailed Metrics:**
+    -   Display the estimated CO₂ savings from all optimizations over time.
+    -   Show the total CO₂ generated by the LLM vs. total CO₂ from code execution.
+
+2.  **Live Progress Indicators:**
+    -   Replace the `st.spinner` with a more visually appealing progress bar or a custom animation that shows the status of code generation and optimization.
+
+3.  **Advanced Visualization:**
+    -   In the Dashboard, use a pie chart to visualize the breakdown of CO₂ from LLM generation versus code execution for a single task.
+    -   Create a line chart showing CO₂ emissions over a day, week, or month to track usage patterns.
+
+4.  **User Authentication and Persistence:**
+    -   Implement user sign-in to save each user's history and dashboard data persistently using a database like Firestore. This will allow users to track their progress over time.
+
+5.  **Interactive Code Editor:**
+    -   Integrate a code editor with syntax highlighting directly into the text area using a custom component to make the experience more professional.
+
+6.  **Code Challenge Mode:**
+    -   Create a section where users are given a problem and have to write a solution. You can then compare their solution's efficiency and CO₂ footprint against a pre-optimized one.
+""")
