@@ -1,91 +1,127 @@
 <p align="center">
-  <img src="assets/logo/CodeLeaf.png" alt="CodeLeaf AI Logo" width="200"/>
+  <img src="assets/logo/CodeLeaf.png" alt="CodeLeaf AI Logo" width="300"/>
 </p>
 
-<p align="center"><i>"A Green Leap Forward — Smart, Simple, Student-Friendly"</i></p>
+<p align="center"><i>"🌿 A Green Leap Forward — Smarter, Greener Code"</i></p>
 
-📌 About
-CodeLeaf AI is a cost-effective AI assistant built by students, for students. It's designed to help developers write more efficient and sustainable code by providing eco-friendly coding insights and a powerful AI code assistant.
+---
 
-This is the MVP (Phase 1) version, focused on core functionalities that are lightweight and run with free and open-source tools.
+## 📌 About
+**CodeLeaf AI** is an eco-conscious coding assistant that helps developers measure and reduce the **carbon footprint of their software**.  
+Built by students, for students and professionals, it combines **AI-powered code generation, optimization, and sustainability insights** to promote greener development practices.
 
-✨ Features (Phase 1 MVP)
-✅ Eco-Friendly Coding Insights using CodeCarbon to track estimated CO₂ emissions.
-✅ AI Code Assistant to generate snippets and provide explanations.
-✅ Math & General QnA for a broad range of queries.
-✅ Streamlit Frontend for a clean, interactive user interface.
-✅ Hugging Face API for AI model power (free tier).
+This is the **MVP (Phase 1)** release — lightweight, cost-effective, and powered entirely by **open-source + free-tier tools**.
 
-🛠️ Tech Stack
-Frontend: Streamlit  
+---
 
-Backend: Python  
+## ✨ Major Functionalities
 
-AI Models: Hugging Face Free Inference API  
+1. ⚡ **Eco-Friendly Coding Insights**  
+   - Track **energy usage & CO₂ emissions** using CodeCarbon.  
+   - Compare “green scores” of different solutions (recursion vs iteration).  
+   - Suggest eco-efficient libraries and methods.  
 
-Version Control: Git + GitHub  
+2. 🤖 **AI Code Assistant**  
+   - Generate and explain code from natural prompts.  
+   - Debug and provide **optimized versions** of inefficient code.  
+   - Support multiple languages (Python, JS, Java, C++).  
+   - AI-driven best practices for efficiency & readability.  
 
-🚀 Quick Start (Step by Step)
-Step 1 Clone the Repository
-git clone [https://github.com/](https://github.com/)<your-username>/codeleaf-ai.git
+3. 📊 **Developer Dashboard**  
+   - Personalized **Green Report** after each run.  
+   - Weekly stats for **energy saved & CO₂ reduced**.  
+   - Interactive **charts & visualizations** (Streamlit + Plotly).  
+
+4. 🌍 **Eco-Aware Recommendations**  
+   - Integration with APIs like **Electricity Maps** (planned).  
+   - Show when running compute-heavy jobs is “greenest” (based on renewable share).  
+
+5. 🧠 **Learning & Community Features** *(upcoming)*  
+   - Built-in **green coding tutorials**.  
+   - “Did you know?” tips (e.g., vectorized NumPy vs loops).  
+   - Share **green badges** on GitHub/LinkedIn.  
+
+---
+
+## 🚀 Development Roadmap
+
+### ✅ Phase 1 – MVP (Current Stage)
+- Core eco-tracking with **CodeCarbon**.  
+- AI Code Assistant via **Hugging Face Free API**.  
+- Flask backend + Streamlit frontend.  
+- Localhost + LAN deployment.  
+- Branding: logo + slogan + basic landing page.  
+
+### ⚡ Phase 2 – Beta Release
+- Add multi-language support (Python + JS at least).  
+- Smarter AI agent with LangChain / LlamaIndex for code Q&A.  
+- Weekly “Green Reports” with efficiency tips.  
+- Gamified **Green Badges** for eco-efficient coding.  
+- Carbon-aware job scheduling with **Electricity Maps API**.  
+
+### 🌍 Phase 3 – Full Release
+- **AI Pair Programmer** (Copilot but eco-aware).  
+- Enterprise dashboards for dev teams.  
+- Community + snippet marketplace.  
+- Leaderboards for “greenest coders.”  
+- Mobile app companion.  
+- Monetization (Freemium + Pro tier).  
+
+---
+
+## 🛠️ Tech Stack
+- **Frontend:** Streamlit (UI, Dashboard)  
+- **Backend:** Flask (Python API)  
+- **AI Models:** Hugging Face Inference API (Qwen, CodeT5, StarCoder)  
+- **Carbon Tracking:** CodeCarbon  
+- **Visualization:** Plotly + Pandas  
+- **Version Control:** Git + GitHub  
+
+---
+
+## ⚡ Quick Start
+
+1️⃣ **Clone the Repository**
+```bash
+git clone https://github.com/<your-username>/codeleaf-ai.git
 cd codeleaf-ai
+```
 
-2 Create Virtual Environment
+2️⃣ **Create Virtual Environment**
+```bash
 python -m venv venv
-source venv/bin/activate   # (Linux/Mac)
-venv\Scripts\activate      # (Windows PowerShell)
+# Linux/Mac
+source venv/bin/activate
+# Windows
+venv\Scripts\activate
+```
 
-3. Install Dependencies
+3️⃣ **Install Dependencies**
+```bash
 pip install -r requirements.txt
+```
 
-4. Get Hugging Face Token
-Create free account → Hugging Face
+4️⃣ **Add Hugging Face Token**
 
-Go to → Access Tokens
+1.Create a free account at Hugging Face.
+2.Go to Access Tokens → generate a token (Read permissions).
+3.Create a .env file:
+```bash
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxx
+```
 
-Create a token with Read permissions.
+5️⃣ **Run the Backend**
+```bash
+cd backend
+python app.py
+# Backend available at http://127.0.0.1:5000
+```
 
-Copy it (looks like hf_xxxxxxxxxxx).
-
-5. Add Environment Variables
-Create a .env file in the root:
-
-HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxx
-
-
-⚠️ Don’t push .env to GitHub (already in .gitignore).
-
-6. Run Streamlit App
+6️⃣ **Run the Frontend**
+```bash
+cd frontend
 streamlit run app.py
+# Localhost: http://localhost:8501
+# Network: http://192.168.29.77:8501
 
-🚀 Roadmap
-Phase 1 – MVP (Goal: launch quickly with core AI + eco features)
-
-Integrate CodeCarbon for CO₂ tracking.
-
-Use Hugging Face free models for basic code explanation and generation.
-
-Display results in a simple dashboard.
-
-Phase 2 – Beta Release (Goal: improve usefulness and attract users)
-
-Add multi-language support (Python + JS).
-
-Integrate LlamaIndex / Haystack for code Q&A.
-
-Use Electricity Maps API for real-time carbon intensity.
-
-Implement “Green Badges” for gamification.
-
-Phase 3 – Full Release (Goal: professional, scalable product)
-
-Add an AI Pair Programmer feature.
-
-Include enterprise features like team dashboards.
-
-Build a community and marketplace.
-
-Launch a companion mobile app.
-
-🤝 Contributing
-Since this is a student project, any feedback, ideas, or contributions are welcome. Feel free to fork and open PRs.
+<p align="center">Made with ❤️ by LeafLabsAI</p> ```
