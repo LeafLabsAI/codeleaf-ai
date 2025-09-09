@@ -137,6 +137,8 @@ st.markdown(f"""
 # ======================
 if "history" not in st.session_state:
     st.session_state.history = []
+if "language" not in st.session_state:
+    st.session_state.language = "python"
 
 # ======================
 # 🌿 Logo + Titles + Theme Switch
@@ -177,25 +179,39 @@ selected_option = option_menu(
 # 🚀 View: Code Generation
 # ======================
 if selected_option == "Code Generation":
-    prompt = st.text_area("💡 Describe the code you want:", height=150, placeholder="e.g., Python calculator, sorting algorithm...")
+    col_lang, col_prompt = st.columns([0.2, 0.8])
+    with col_lang:
+        st.session_state.language = st.selectbox(
+            'Language',
+            ('python', 'c'),
+            index=0,
+            key='codegen_lang'
+        )
+    with col_prompt:
+        prompt = st.text_area(
+            "💡 Describe the code you want:", 
+            height=150, 
+            placeholder=f"e.g., A simple calculator in {st.session_state.language}...",
+            key="codegen_prompt"
+        )
 
     if st.button("⚡ Generate Code", key="generate_code"):
         if prompt.strip():
             with st.spinner("🌱 Growing your code..."):
                 try:
-                    # This requests call communicates with the Flask backend.
-                    r = requests.post("http://127.0.0.1:5000/codegen", json={"prompt": prompt})
+                    r = requests.post("http://127.0.0.1:5000/codegen", json={"prompt": prompt, "language": st.session_state.language})
                     r.raise_for_status()
                     data = r.json()
 
                     st.markdown('<div class="output-card">', unsafe_allow_html=True)
                     st.subheader("📝 Generated Code")
-                    st.code(data["code"], language="python")
+                    st.code(data["code"], language=st.session_state.language)
                     st.success(f"🌍 Estimated Total CO₂: {data['total_co2_kg']:.6f} kg")
                     st.markdown('</div>', unsafe_allow_html=True)
 
                     st.session_state.history.insert(0, {
                         "type": "generation",
+                        "language": st.session_state.language,
                         "prompt": prompt,
                         "code": data["code"],
                         "llm_co2_kg": data["llm_co2_kg"],
@@ -213,26 +229,42 @@ if selected_option == "Code Generation":
 # 📈 View: Code Optimization
 # ======================
 elif selected_option == "Code Optimization":
-    st.subheader("Unoptimized Code")
-    unoptimized_code = st.text_area("Paste your code here:", height=300, key="unoptimized_code_input")
+    col_lang_opt, col_title_opt = st.columns([0.2, 0.8])
+    with col_lang_opt:
+        st.session_state.language = st.selectbox(
+            'Language',
+            ('python', 'c'),
+            index=0,
+            key='optimize_lang'
+        )
+    with col_title_opt:
+        st.subheader(f"Unoptimized {st.session_state.language.capitalize()} Code")
+
+    unoptimized_code = st.text_area(
+        "Paste your code here:", 
+        height=300, 
+        key="unoptimized_code_input"
+    )
 
     if st.button("♻️ Optimize & Compare", key="optimize_code"):
         if unoptimized_code.strip():
             with st.spinner("🌿 Optimizing your code..."):
                 try:
-                    payload = {"code": unoptimized_code}
+                    payload = {"code": unoptimized_code, "language": st.session_state.language}
                     r = requests.post("http://127.0.0.1:5000/optimize", json=payload)
                     r.raise_for_status()
                     data = r.json()
 
                     st.markdown('<div class="optimization-card">', unsafe_allow_html=True)
-                    st.subheader("✅ Optimized Code")
-                    st.code(data["optimized_code"], language="python")
+                    st.subheader(f"✅ Optimized {st.session_state.language.capitalize()} Code")
+                    st.code(data["optimized_code"], language=st.session_state.language)
 
-                    col1, col2 = st.columns(2)
+                    col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.info(f"Before CO₂: {data['before_co2']:.6f} kg")
+                        st.info(f"LLM CO₂: {data['llm_co2_kg']:.6f} kg")
                     with col2:
+                        st.info(f"Before CO₂: {data['before_co2']:.6f} kg")
+                    with col3:
                         st.success(f"After CO₂: {data['after_co2']:.6f} kg")
 
                     st.markdown(f"**CO₂ Saved:** :green[**{(data['before_co2'] - data['after_co2']):.6f} kg**]")
@@ -240,8 +272,10 @@ elif selected_option == "Code Optimization":
 
                     st.session_state.history.insert(0, {
                         "type": "optimization",
+                        "language": st.session_state.language,
                         "unoptimized_code": unoptimized_code,
                         "optimized_code": data["optimized_code"],
+                        "llm_co2_kg": data["llm_co2_kg"],
                         "co2_before_kg": data["before_co2"],
                         "co2_after_kg": data["after_co2"],
                         "timestamp": datetime.now()
@@ -272,22 +306,23 @@ elif selected_option == "Dashboard":
 
             st.subheader("Last Code Generations by CO₂ Footprint")
             fig = px.bar(df, x="Timestamp", y="Total CO₂ (kg)", text="Total CO₂ (kg)", color="Total CO₂ (kg)",
-                          color_continuous_scale="greens")
+                         color_continuous_scale="greens")
             st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("📜 History Log")
         for item in st.session_state.history:
-            with st.expander(f"🔹 {item['type'].capitalize()} @ {item['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
+            with st.expander(f"🔹 {item['language'].capitalize()} {item['type'].capitalize()} @ {item['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
                 if item["type"] == "generation":
                     st.markdown(f"**Prompt:** {item['prompt']}")
-                    st.code(item["code"], language="python")
+                    st.code(item["code"], language=item["language"])
                     st.markdown(f"**LLM CO₂:** `{item['llm_co2_kg']:.6f} kg`")
                     st.markdown(f"**Execution CO₂:** `{item['execution_co2_kg']:.6f} kg`")
                 elif item["type"] == "optimization":
-                    st.markdown("**Before Optimization Code:**")
-                    st.code(item["unoptimized_code"], language="python")
-                    st.markdown("**After Optimization Code:**")
-                    st.code(item["optimized_code"], language="python")
+                    st.markdown(f"**Before Optimization {item['language'].capitalize()} Code:**")
+                    st.code(item["unoptimized_code"], language=item["language"])
+                    st.markdown(f"**After Optimization {item['language'].capitalize()} Code:**")
+                    st.code(item["optimized_code"], language=item["language"])
+                    st.markdown(f"**LLM CO₂:** `{item['llm_co2_kg']:.6f} kg`")
                     st.markdown(f"**Before CO₂:** `{item['co2_before_kg']:.6f} kg`")
                     st.markdown(f"**After CO₂:** `{item['co2_after_kg']:.6f} kg`")
                     st.markdown(f"**Saved:** `{(item['co2_before_kg'] - item['co2_after_kg']):.6f} kg`")
@@ -301,30 +336,3 @@ st.markdown(
     "<footer>Made with ❤️ by LeafLabsAI • <a href='https://github.com/LeafLabsAI/codeleaf-ai'>GitHub</a></footer>",
     unsafe_allow_html=True
 )
-
-# ======================
-# 💡 Further Ideas to Implement
-# ======================
-st.markdown("""
-### 🌳 Ideas to Grow Your App:
-
-1.  **More Detailed Metrics:**
-    -   Display the estimated CO₂ savings from all optimizations over time.
-    -   Show the total CO₂ generated by the LLM vs. total CO₂ from code execution.
-
-2.  **Live Progress Indicators:**
-    -   Replace the `st.spinner` with a more visually appealing progress bar or a custom animation that shows the status of code generation and optimization.
-
-3.  **Advanced Visualization:**
-    -   In the Dashboard, use a pie chart to visualize the breakdown of CO₂ from LLM generation versus code execution for a single task.
-    -   Create a line chart showing CO₂ emissions over a day, week, or month to track usage patterns.
-
-4.  **User Authentication and Persistence:**
-    -   Implement user sign-in to save each user's history and dashboard data persistently using a database like Firestore. This will allow users to track their progress over time.
-
-5.  **Interactive Code Editor:**
-    -   Integrate a code editor with syntax highlighting directly into the text area using a custom component to make the experience more professional.
-
-6.  **Code Challenge Mode:**
-    -   Create a section where users are given a problem and have to write a solution. You can then compare their solution's efficiency and CO₂ footprint against a pre-optimized one.
-""")
