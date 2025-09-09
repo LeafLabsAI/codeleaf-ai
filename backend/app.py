@@ -22,7 +22,7 @@ MODEL = "Qwen/Qwen3-Coder-30B-A3B-Instruct"  # The model to use
 
 # Initialize the Hugging Face InferenceClient once for efficiency
 if HF_TOKEN:
-    client = InferenceClient(model=MODEL, token=HF_TOKEN)
+    client = InferenceClient(model=MODEL, token=HF_TOKEN, headers={"Accept-Encoding": "identity"})
 else:
     client = None
 
