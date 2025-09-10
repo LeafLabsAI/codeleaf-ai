@@ -124,4 +124,4 @@ streamlit run app.py
 # Localhost: http://localhost:8501
 # Network: http://192.168.29.77:8501
 ```
-<p align="center">Made with ❤️ by LeafLabsAI</p> ```
+<p align="center">Made with ❤️ by Leaf Core Labs</p> ```
