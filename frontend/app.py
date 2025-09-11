@@ -146,7 +146,7 @@ if "language" not in st.session_state:
 col_logo, col_theme = st.columns([1, 0.1])
 with col_logo:
     # Conditionally load the logo based on the current theme
-    logo_path = "assets/logo/CodeLeaf.png" if st.session_state.theme == "dark" else "assets/logo/CodeLeaf-light.png"
+    logo_path = "assets/Code.png" if st.session_state.theme == "dark" else "assets/Code-light.png"
     st.image(logo_path, width=180)
     st.markdown('<div class="title">🌿 CodeLeaf AI</div>', unsafe_allow_html=True)
     st.markdown('<div class="subtitle">A Green Leap Forward – Generate Smarter, Greener Code</div>', unsafe_allow_html=True)
