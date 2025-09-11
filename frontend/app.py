@@ -333,6 +333,6 @@ elif selected_option == "Dashboard":
 # ❤️ Footer
 # ======================
 st.markdown(
-    "<footer>Made with ❤️ by Leaf Core Labs • <a href='https://github.com/LeafLabsAI/codeleaf-ai'>GitHub</a></footer>",
+    "<footer>Made with ❤️ by Leaf Core Labs • <a href='https://github.com/LeafCoreLabs/codeleaf-ai'>GitHub</a></footer>",
     unsafe_allow_html=True
 )
