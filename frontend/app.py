@@ -94,7 +94,7 @@ st.markdown(f"""
             background: linear-gradient(to right, #22c55e, #16a34a);
             transform: scale(1.05);
         }}
-        .output-card {{
+        .output-card, .optimization-card {{
             background-color: {theme['card_bg']};
             padding: 20px;
             border-radius: 12px;
@@ -102,11 +102,6 @@ st.markdown(f"""
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
         }}
         .optimization-card {{
-            background-color: {theme['card_bg']};
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
             border: 1px solid {theme['card_border']};
         }}
         .history-card {{
@@ -145,13 +140,11 @@ if "language" not in st.session_state:
 # ======================
 col_logo, col_theme = st.columns([1, 0.1])
 with col_logo:
-    # Conditionally load the logo based on the current theme
     logo_path = "assets/Code.png" if st.session_state.theme == "dark" else "assets/Code-light.png"
     st.image(logo_path, width=180)
     st.markdown('<div class="title">🌿 CodeLeaf AI</div>', unsafe_allow_html=True)
     st.markdown('<div class="subtitle">A Green Leap Forward – Generate Smarter, Greener Code</div>', unsafe_allow_html=True)
 with col_theme:
-    # This is the theme toggle. Its state is saved in `st.session_state`.
     if st.toggle("Dark Mode", value=(st.session_state.theme == "dark")):
         st.session_state.theme = "dark"
     else:
@@ -181,12 +174,7 @@ selected_option = option_menu(
 if selected_option == "Code Generation":
     col_lang, col_prompt = st.columns([0.2, 0.8])
     with col_lang:
-        st.session_state.language = st.selectbox(
-            'Language',
-            ('python', 'c'),
-            index=0,
-            key='codegen_lang'
-        )
+        st.session_state.language = st.selectbox('Language', ('python', 'c'), index=0, key='codegen_lang')
     with col_prompt:
         prompt = st.text_area(
             "💡 Describe the code you want:", 
@@ -207,8 +195,20 @@ if selected_option == "Code Generation":
                     st.subheader("📝 Generated Code")
                     st.code(data["code"], language=st.session_state.language)
                     st.success(f"🌍 Estimated Total CO₂: {data['total_co2_kg']:.6f} kg")
+
+                    # Show execution details
+                    if 'execution_details' in data:
+                        runs = data['execution_details'].get('individual_runs', [])
+                        errors = data['execution_details'].get('errors', [])
+                        if runs:
+                            st.markdown(f"**Per-run CO₂ emissions:** {['{:.6f}'.format(x) for x in runs]} kg")
+                        if errors:
+                            with st.expander("⚠️ Execution Errors"):
+                                for err in errors:
+                                    st.warning(err)
                     st.markdown('</div>', unsafe_allow_html=True)
 
+                    # Save to history
                     st.session_state.history.insert(0, {
                         "type": "generation",
                         "language": st.session_state.language,
@@ -216,6 +216,7 @@ if selected_option == "Code Generation":
                         "code": data["code"],
                         "llm_co2_kg": data["llm_co2_kg"],
                         "execution_co2_kg": data["execution_co2_kg"],
+                        "execution_details": data.get("execution_details", {}),
                         "timestamp": datetime.now()
                     })
                 except requests.exceptions.ConnectionError:
@@ -231,20 +232,11 @@ if selected_option == "Code Generation":
 elif selected_option == "Code Optimization":
     col_lang_opt, col_title_opt = st.columns([0.2, 0.8])
     with col_lang_opt:
-        st.session_state.language = st.selectbox(
-            'Language',
-            ('python', 'c'),
-            index=0,
-            key='optimize_lang'
-        )
+        st.session_state.language = st.selectbox('Language', ('python', 'c'), index=0, key='optimize_lang')
     with col_title_opt:
         st.subheader(f"Unoptimized {st.session_state.language.capitalize()} Code")
 
-    unoptimized_code = st.text_area(
-        "Paste your code here:", 
-        height=300, 
-        key="unoptimized_code_input"
-    )
+    unoptimized_code = st.text_area("Paste your code here:", height=300, key="unoptimized_code_input")
 
     if st.button("♻️ Optimize & Compare", key="optimize_code"):
         if unoptimized_code.strip():
@@ -294,7 +286,6 @@ elif selected_option == "Dashboard":
     st.header("📊 Your Green Dashboard")
 
     if st.session_state.history:
-        # Create DataFrame for chart
         generation_data = [item for item in st.session_state.history if item["type"] == "generation"]
         if generation_data:
             chart_data = [{
@@ -303,10 +294,8 @@ elif selected_option == "Dashboard":
             } for item in generation_data]
 
             df = pd.DataFrame(chart_data)
-
             st.subheader("Last Code Generations by CO₂ Footprint")
-            fig = px.bar(df, x="Timestamp", y="Total CO₂ (kg)", text="Total CO₂ (kg)", color="Total CO₂ (kg)",
-                         color_continuous_scale="greens")
+            fig = px.bar(df, x="Timestamp", y="Total CO₂ (kg)", text="Total CO₂ (kg)", color="Total CO₂ (kg)", color_continuous_scale="greens")
             st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("📜 History Log")
@@ -317,6 +306,13 @@ elif selected_option == "Dashboard":
                     st.code(item["code"], language=item["language"])
                     st.markdown(f"**LLM CO₂:** `{item['llm_co2_kg']:.6f} kg`")
                     st.markdown(f"**Execution CO₂:** `{item['execution_co2_kg']:.6f} kg`")
+                    # Optional: execution details
+                    exec_details = item.get("execution_details", {})
+                    if exec_details.get("individual_runs"):
+                        st.markdown(f"**Per-run CO₂:** {['{:.6f}'.format(x) for x in exec_details['individual_runs']]} kg")
+                    if exec_details.get("errors"):
+                        for err in exec_details["errors"]:
+                            st.warning(f"Error: {err}")
                 elif item["type"] == "optimization":
                     st.markdown(f"**Before Optimization {item['language'].capitalize()} Code:**")
                     st.code(item["unoptimized_code"], language=item["language"])
