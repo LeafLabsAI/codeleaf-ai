@@ -40,11 +40,45 @@ light_theme = {
     "card_border": "#d1d5db"
 }
 
-# Use session state to manage the theme across reruns
+# ======================
+# Session State Initialization
+# ======================
+if "history" not in st.session_state:
+    st.session_state.history = []
+if "language" not in st.session_state:
+    st.session_state.language = "python"
+# Initialize theme state
 if "theme" not in st.session_state:
     st.session_state.theme = "dark"
 
+
+# ======================
+# 🌿 Header and Theme Switch Logic
+# This section is now reordered to fix the theme toggler bug.
+# ======================
+
+# Create columns for the header
+col_logo, col_theme = st.columns([1, 0.1])
+
+with col_theme:
+    # 1. RENDER THE TOGGLE FIRST
+    # The toggle's state is stored in st.session_state.is_dark_mode
+    is_dark = st.toggle("Dark Mode", value=(st.session_state.theme == "dark"), key="theme_toggler")
+
+# 2. UPDATE THE THEME STATE IMMEDIATELY
+# This ensures the theme is set *before* the rest of the page renders
+st.session_state.theme = "dark" if is_dark else "light"
 theme = dark_theme if st.session_state.theme == "dark" else light_theme
+
+# 3. NOW RENDER THE REST OF THE HEADER AND THE CSS
+# The CSS will now use the correct, updated theme colors
+with col_logo:
+    # I've restored the original logic to use different logos for each theme.
+    logo_path = "assets/Code_v_dark.png" if st.session_state.theme == "dark" else "assets/Code_v.png"
+    st.image(logo_path, width=180)
+    st.markdown('<div class="title">🌿 CodeLeaf AI</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">A Green Leap Forward – Generate Smarter, Greener Code</div>', unsafe_allow_html=True)
+
 
 # ======================
 # 🎨 Custom CSS Styling
@@ -127,28 +161,6 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# ======================
-# Session State Initialization
-# ======================
-if "history" not in st.session_state:
-    st.session_state.history = []
-if "language" not in st.session_state:
-    st.session_state.language = "python"
-
-# ======================
-# 🌿 Logo + Titles + Theme Switch
-# ======================
-col_logo, col_theme = st.columns([1, 0.1])
-with col_logo:
-    logo_path = "assets/Code.png" if st.session_state.theme == "dark" else "assets/Code-light.png"
-    st.image(logo_path, width=180)
-    st.markdown('<div class="title">🌿 CodeLeaf AI</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">A Green Leap Forward – Generate Smarter, Greener Code</div>', unsafe_allow_html=True)
-with col_theme:
-    if st.toggle("Dark Mode", value=(st.session_state.theme == "dark")):
-        st.session_state.theme = "dark"
-    else:
-        st.session_state.theme = "light"
 
 # ======================
 # ⚡ Menu for Navigation
@@ -177,8 +189,8 @@ if selected_option == "Code Generation":
         st.session_state.language = st.selectbox('Language', ('python', 'c'), index=0, key='codegen_lang')
     with col_prompt:
         prompt = st.text_area(
-            "💡 Describe the code you want:", 
-            height=150, 
+            "💡 Describe the code you want:",
+            height=150,
             placeholder=f"e.g., A simple calculator in {st.session_state.language}...",
             key="codegen_prompt"
         )
@@ -329,6 +341,7 @@ elif selected_option == "Dashboard":
 # ❤️ Footer
 # ======================
 st.markdown(
-    "<footer>Made with ❤️ by Leaf Core Labs • <a href='https://github.com/LeafCoreLabs/codeleaf-ai'>GitHub</a></footer>",
+    "<footer>Made with ❤️ by Leaf Core Labs • <a href='https://github.com/LeafCoreLabs/codeleaf-ai'>GitHub</a> • Based on Qwen/Qwen3-Coder-30B-A3B-Instruct</footer>",
     unsafe_allow_html=True
 )
+

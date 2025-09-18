@@ -13,6 +13,10 @@ import json
 import psutil
 import platform
 import re
+import logging
+
+# Set codecarbon to info level for detailed logs
+logging.getLogger("codecarbon").setLevel(logging.INFO)
 
 # ====================== Flask App Configuration ======================
 app = Flask(__name__)
@@ -53,7 +57,8 @@ def universal_emissions_tracker(executable, num_runs=3) -> float:
     try:
         for _ in range(num_runs):
             start_time = time.time()
-            subprocess.run(executable, capture_output=True, text=True, timeout=300)
+            # Provide empty input to prevent hangs on interactive prompts like scanf
+            subprocess.run(executable, input="", capture_output=True, text=True, timeout=300)
             elapsed = time.time() - start_time
 
             cpu_count = psutil.cpu_count(logical=True)
@@ -79,17 +84,22 @@ def run_code_and_track_emissions(code: str, test_params: dict, language: str) ->
 
     temp_file = None
     exec_file = None
-    function_name = test_params.get("function_name", "dummy_function")
-    data_size = test_params.get("data_size", 1000)
 
     try:
         if language.lower() == "python":
+            function_name = test_params.get("function_name", "dummy_function")
+            data_size = test_params.get("data_size", 1000)
             wrapped_code = f"""
 import sys, traceback, json
 from codecarbon import EmissionsTracker
+import logging
+
+# Also set logger level inside the subprocess
+logging.getLogger("codecarbon").setLevel(logging.INFO)
+
 {code}
 
-tracker = EmissionsTracker()
+tracker = EmissionsTracker(save_to_file=False)
 tracker.start()
 try:
     func = locals().get('{function_name}')
@@ -101,7 +111,6 @@ try:
 except Exception as e:
     print("ERROR:", e, file=sys.stderr)
 emissions = tracker.stop()
-print(json.dumps({{"emissions": emissions}}))
 """
             with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
                 temp_file = f.name
@@ -109,27 +118,19 @@ print(json.dumps({{"emissions": emissions}}))
                 f.flush()
 
             executable = [sys.executable, temp_file]
-            tracker = EmissionsTracker()
+            
+            tracker = EmissionsTracker(save_to_file=False)
             tracker.start()
-            subprocess.run(executable, capture_output=True, text=True, timeout=300)
+            # Provide empty input to prevent hangs on interactive prompts like input()
+            subprocess.run(executable, input="", capture_output=True, text=True, timeout=300)
             emissions = tracker.stop()
-            return emissions
+            return emissions if emissions is not None else 0.0
 
         elif language.lower() == "c":
             code = clean_code(code)
-            wrapped_code = f"""
-#include <stdio.h>
-
-{code}
-
-int main(void) {{
-    // optional: call your functions here
-    return 0;
-}}
-"""
             with tempfile.NamedTemporaryFile(mode="w", suffix=".c", delete=False) as f:
                 temp_file = f.name
-                f.write(wrapped_code)
+                f.write(code) # Use the cleaned code directly without wrapping
                 f.flush()
 
             exec_file = temp_file.replace(".c", "")
@@ -170,7 +171,7 @@ def codegen():
         if client is None:
             return jsonify({"error": "Hugging Face API token not set."}), 500
 
-        system_prompt = f"You are a helpful {language} coding assistant. Generate clear, concise, carbon and power efficient short code. Provide only the code block with best case time and space complexity with proper executable format."
+        system_prompt = f"You are a helpful {language} coding assistant. Generate clear, concise, carbon and power efficient short code. Provide only the code block with best case time and space complexity with proper executable format. Do not include any comments or explanations.Generate full code with necessary imports and definitions like main() dont just generate function definitions only."
         full_prompt = f"Generate a {language} function that {prompt}."
 
         start_time = time.time()
@@ -185,12 +186,12 @@ def codegen():
 
         # Estimate LLM CO2
         cpu_count = psutil.cpu_count(logical=True)
-        cpu_power_w = 45
-        gpu_power_w = 300
+        cpu_power_w = 45 * 0.03
+        gpu_power_w = 300 * 0.03
         energy_kwh = ((cpu_power_w * cpu_count) + gpu_power_w) * request_time / 3600
         llm_co2_kg = energy_kwh * 0.475
 
-        execution_co2_kg = run_code_and_track_emissions(code, {"function_name": "dummy_function", "data_size": 1}, language)
+        execution_co2_kg = run_code_and_track_emissions(code, {}, language)
 
         if not code:
             code = f"# No {language} code generated."
@@ -225,7 +226,7 @@ def optimize():
         co2_before_kg = run_code_and_track_emissions(unoptimized_code, test_case_params, language)
 
         optimization_prompt = f"""
-The following {language} code is inefficient. Provide an optimized version that reduces energy consumption and CO2 footprint with best-case space and time complexity but without any comments and in proper executable format.
+The following {language} code is inefficient. Provide an optimized version that reduces energy consumption and CO2 footprint with best-case space and time complexity but without any comments and in proper executable format without any extra text and explanations."
 Unoptimized code:
 {language} {unoptimized_code}
 Provide only the optimized {language} code.
@@ -243,8 +244,8 @@ Provide only the optimized {language} code.
 
         # Estimate LLM CO2
         cpu_count = psutil.cpu_count(logical=True)
-        cpu_power_w = 45
-        gpu_power_w = 300
+        cpu_power_w = 45 * 0.03
+        gpu_power_w = 300 * 0.03
         energy_kwh = ((cpu_power_w * cpu_count) + gpu_power_w) * request_time / 3600
         llm_co2_kg = energy_kwh * 0.475
 
@@ -266,3 +267,4 @@ Provide only the optimized {language} code.
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+

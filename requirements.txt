@@ -1,6 +1,15 @@
+# === Backend dependencies ===
 flask
-streamlit
 requests
 huggingface_hub
 codecarbon
 python-dotenv
+psutil
+platformdirs  
+regex         
+
+# === Frontend dependencies ===
+streamlit
+streamlit-option-menu
+plotly
+pandas
