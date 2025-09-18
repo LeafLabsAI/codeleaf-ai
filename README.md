@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/Code_v_dark.png" alt="CodeLeaf AI Logo" width="300"/>
+  <img src="assets/Code_v.png" alt="CodeLeaf AI Logo" width="300"/>
 </p>
 
 <p align="center"><i>"🌿 A Green Leap Forward — Smarter, Greener Code"</i></p>
