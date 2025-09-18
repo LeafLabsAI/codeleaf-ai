@@ -170,7 +170,7 @@ def codegen():
         if client is None:
             return jsonify({"error": "Hugging Face API token not set."}), 500
 
-        system_prompt = f"You are a helpful {language} coding assistant. Generate clear, concise, carbon and power efficient short code. Provide only the code block with best case time and space complexity with proper executable format."
+        system_prompt = f"You are a helpful {language} coding assistant. Generate clear, concise, carbon and power efficient short code. Provide only the code block with best case time and space complexity with proper executable format. Do not include any comments or explanations.Generate full code with necessary imports and definitions like main() dont just generate function definitions only."
         full_prompt = f"Generate a {language} function that {prompt}."
 
         start_time = time.time()
@@ -225,7 +225,7 @@ def optimize():
         co2_before_kg = run_code_and_track_emissions(unoptimized_code, test_case_params, language)
 
         optimization_prompt = f"""
-The following {language} code is inefficient. Provide an optimized version that reduces energy consumption and CO2 footprint with best-case space and time complexity but without any comments and in proper executable format.
+The following {language} code is inefficient. Provide an optimized version that reduces energy consumption and CO2 footprint with best-case space and time complexity but without any comments and in proper executable format without any extra text and explanations."
 Unoptimized code:
 {language} {unoptimized_code}
 Provide only the optimized {language} code.
