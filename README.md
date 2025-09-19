@@ -8,7 +8,7 @@
 
 ## 📌 About
 **CodeLeaf AI** is an eco-conscious coding assistant that helps developers measure and reduce the **carbon footprint of their software**.  
-Built by students, for students and professionals, it combines **AI-powered code generation, optimization, and sustainability insights** to promote greener development practices.
+Built by LeafCore Labs, for students and professionals, it combines **AI-powered code generation, optimization, and sustainability insights** to promote greener development practices.
 
 This is the **MVP (Phase 1)** release — lightweight, cost-effective, and powered entirely by **open-source + free-tier tools**.
 
